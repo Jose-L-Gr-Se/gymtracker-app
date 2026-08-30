@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "GymTracker",
-    "slug": "gymtracker-app",
+    "slug": "gymtracker",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -45,6 +45,11 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "e52e4383-1f20-47a8-9bc6-b2de14b26ebc"
+      }
     }
   }
 }
