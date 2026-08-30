@@ -37,6 +37,15 @@ interface AuthState {
   bootstrap: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<string | null>;
   signUp: (email: string, password: string, fullName: string) => Promise<string | null>;
+  /**
+   * Canjea un id_token de Google o Apple por una sesión de Supabase.
+   * `fullName` solo llega de Apple y solo en el primer inicio de sesión.
+   */
+  signInWithIdToken: (
+    provider: 'google' | 'apple',
+    idToken: string,
+    fullName?: string,
+  ) => Promise<string | null>;
   resetPassword: (email: string) => Promise<string | null>;
   continueAsGuest: () => Promise<void>;
   signOut: () => Promise<void>;
@@ -154,6 +163,34 @@ export const useAuth = create<AuthState>((set, get) => ({
       userId: user.id,
       profile: cloudProfile ?? (await loadLocalProfile(user.id)),
     });
+    return null;
+  },
+
+  signInWithIdToken: async (provider, idToken, fullName) => {
+    const supabase = getSupabase();
+    if (!supabase) return 'La nube no está configurada en esta build.';
+    const { data, error } = await supabase.auth.signInWithIdToken({ provider, token: idToken });
+    if (error) return error.message;
+    const user = data.user;
+    if (!user) return 'No se pudo iniciar sesión.';
+    await AsyncStorage.removeItem(GUEST_KEY);
+
+    const cloudProfile = await fetchCloudProfile(user.id);
+    const stored = cloudProfile ?? (await loadLocalProfile(user.id));
+    // Apple solo entrega el nombre la primera vez: si aún no tenemos uno, se
+    // guarda ahora o se pierde para siempre. Google lo trae en el id_token.
+    const derivedName =
+      stored.fullName ||
+      fullName?.trim() ||
+      (user.user_metadata?.full_name as string | undefined)?.trim() ||
+      (user.user_metadata?.name as string | undefined)?.trim() ||
+      '';
+    const profile = sanitizeProfile({ ...stored, fullName: derivedName, email: stored.email || user.email || '' });
+
+    set({ user, isGuest: false, userId: user.id, profile });
+    if (profile.fullName !== stored.fullName || profile.email !== stored.email) {
+      await AsyncStorage.setItem(profileKey(user.id), JSON.stringify(profile));
+    }
     return null;
   },
 

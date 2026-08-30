@@ -11,6 +11,7 @@
     "ios": {
       "bundleIdentifier": "com.joselgrse.gymtracker",
       "supportsTablet": false,
+      "usesAppleSignIn": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -39,7 +40,9 @@
           "imageWidth": 148
         }
       ],
-      "expo-notifications"
+      "expo-notifications",
+      "expo-apple-authentication",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,

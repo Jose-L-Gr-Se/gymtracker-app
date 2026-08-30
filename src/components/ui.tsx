@@ -1,4 +1,5 @@
-import React from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import React, { useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -76,6 +77,44 @@ export function Input({ label, error, style, ...rest }: InputProps) {
         style={[styles.input, error ? { borderColor: colors.danger } : null, style]}
         {...rest}
       />
+      {error ? <Text style={styles.inputError}>{error}</Text> : null}
+    </View>
+  );
+}
+
+/**
+ * Campo de contraseña con conmutador de visibilidad. Escribir una contraseña
+ * a ciegas en un móvil es la primera fuente de fallos de acceso, así que
+ * poder verla es esperable en cualquier app seria.
+ */
+export function PasswordInput({ label, error, style, ...rest }: InputProps) {
+  const [visible, setVisible] = useState(false);
+  return (
+    <View style={{ gap: spacing.xs }}>
+      {label ? <Text style={styles.inputLabel}>{label}</Text> : null}
+      <View style={{ justifyContent: 'center' }}>
+        <TextInput
+          placeholderTextColor={colors.textDim}
+          secureTextEntry={!visible}
+          style={[styles.input, { paddingRight: TAP + spacing.sm }, error ? { borderColor: colors.danger } : null, style]}
+          {...rest}
+        />
+        <Pressable
+          onPress={() => setVisible((v) => !v)}
+          accessibilityRole="button"
+          accessibilityLabel={visible ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+          style={{
+            position: 'absolute',
+            right: 0,
+            width: TAP,
+            height: TAP,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Ionicons name={visible ? 'eye-off-outline' : 'eye-outline'} size={20} color={colors.textMuted} />
+        </Pressable>
+      </View>
       {error ? <Text style={styles.inputError}>{error}</Text> : null}
     </View>
   );
@@ -200,6 +239,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.borderLight,
     borderRadius: radius.md,
+    minHeight: TAP + 6,
     paddingHorizontal: spacing.lg,
     paddingVertical: 12,
     color: colors.text,

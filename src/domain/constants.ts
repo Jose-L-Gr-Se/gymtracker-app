@@ -50,6 +50,21 @@ export const GOAL_LABELS: Record<Goal, string> = {
   performance: 'Rendimiento',
 };
 
+/** Qué implica cada objetivo, para que la elección no sea a ciegas. */
+export const GOAL_DESCRIPTIONS: Record<Goal, string> = {
+  general_fitness: 'Mantenerte activo y sano, sin obsesión por los números',
+  muscle_gain: 'Prioridad al volumen de trabajo y a la hipertrofia',
+  strength: 'Cargas altas y pocas repeticiones',
+  fat_loss: 'Mantener músculo mientras bajas grasa',
+  performance: 'Potencia, agilidad y condición física',
+};
+
+export const EXPERIENCE_DESCRIPTIONS: Record<ExperienceLevel, string> = {
+  beginner: 'Menos de 1 año entrenando con constancia',
+  intermediate: 'Entre 1 y 3 años, conoces la técnica básica',
+  advanced: 'Más de 3 años, entrenas con planificación',
+};
+
 export const EXPERIENCE_LEVELS: ExperienceLevel[] = [
   'beginner',
   'intermediate',

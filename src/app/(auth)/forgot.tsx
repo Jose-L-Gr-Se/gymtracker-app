@@ -4,6 +4,7 @@ import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button, Input } from '@/components/ui';
+import { translateAuthError } from '@/features/auth/errors';
 import { useAuth } from '@/state/useAuth';
 import { colors, font, spacing } from '@/theme/tokens';
 
@@ -20,7 +21,7 @@ export default function ForgotPassword() {
     setError('');
     const result = await resetPassword(email);
     setLoading(false);
-    if (result) setError(result);
+    if (result) setError(translateAuthError(result));
     else setSent(true);
   };
 

@@ -4,8 +4,8 @@ App nativa de seguimiento de entrenamiento (Android e iOS) construida con **Expo
 
 ## Funcionalidades
 
-- **Login real** con Supabase (email + contraseña, recuperación de contraseña) y **modo invitado** 100 % local.
-- **Onboarding** en 4 pasos: nombre, objetivo, experiencia, unidades, meta semanal y rutina inicial desde plantilla (PPL, Upper/Lower, Full Body).
+- **Login real** con Supabase: email + contraseña con medidor de fuerza y errores traducidos, recuperación de contraseña, **Google Sign-In** y **Sign in with Apple** (cada botón aparece solo si su proveedor está configurado), y **modo invitado** 100 % local.
+- **Onboarding** en 5 pasos con indicador de progreso: nombre, objetivo, experiencia, unidades y meta semanal, y rutina inicial desde plantilla.
 - **Plantillas**: el programa completo **ATLAS v2.0** (8 sesiones, 12 semanas, con series/reps/RIR del programa) y las divisiones clásicas (PPL, Upper/Lower, Full Body), sobre una biblioteca de 63 ejercicios.
 - **Rutinas**: ejercicios con series objetivo, rangos de reps y RIR, descansos por ejercicio y **superseries**.
 - **Entreno activo**: registro de peso/reps/RPE/RIR, tipos de serie (calentamiento, drop, fallo), temporizador de descanso con notificación local y pantalla siempre encendida. Completar una serie en blanco **confirma los valores de la sesión anterior** que ya ves como referencia, en vez de guardar una serie vacía. El borrador se persiste en cada cambio: **cerrar la app no pierde el entreno**.
@@ -63,6 +63,25 @@ Sin `.env` la app arranca en modo solo-local (invitado), sin login ni nube.
 4. Authentication → Providers → Email: habilitado por defecto. Si quieres iniciar sesión sin verificar el correo durante el desarrollo, desactiva "Confirm email".
 
 El esquema es compatible con el de la PWA v2: si ya usabas Supabase con la PWA, la app leerá tus datos existentes con la misma cuenta.
+
+### Configurar Google Sign-In (opcional)
+
+Mientras no esté configurado, el botón de Google sencillamente no aparece — es preferible ocultarlo a mostrar uno que falla.
+
+1. **Google Cloud Console** → *APIs y servicios* → *Credenciales* → crear IDs de cliente OAuth:
+   - **Web**: obligatorio, es el que valida Supabase.
+   - **Android**: con el paquete `com.joselgrse.gymtracker` y la huella **SHA-1** de la firma. La de tu build de EAS se obtiene con `eas credentials` → Android → *Keystore*.
+   - **iOS**: con el mismo bundle identifier.
+2. **Supabase** → *Authentication* → *Providers* → *Google*: pega el **client ID y el secret del cliente web**.
+3. Copia los tres IDs a tu `.env` (ver `.env.example`).
+
+Para builds de EAS, las variables se registran con `eas env:create` en vez de en el `.env` local.
+
+### Configurar Sign in with Apple (opcional, solo iOS)
+
+Requiere cuenta de Apple Developer de pago. En el portal de Apple hay que habilitar la capability *Sign in with Apple* para el bundle identifier, y en Supabase configurar el proveedor Apple. El botón solo se muestra en iOS 13+ y cuando el sistema lo reporta disponible.
+
+Apple entrega el nombre del usuario **solo en el primer inicio de sesión**; la app lo guarda en ese momento, porque después ya no vuelve a enviarlo.
 
 ### Verificación
 
