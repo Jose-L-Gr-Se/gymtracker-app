@@ -6,14 +6,29 @@ App nativa de seguimiento de entrenamiento (Android e iOS) construida con **Expo
 
 - **Login real** con Supabase (email + contraseña, recuperación de contraseña) y **modo invitado** 100 % local.
 - **Onboarding** en 4 pasos: nombre, objetivo, experiencia, unidades, meta semanal y rutina inicial desde plantilla (PPL, Upper/Lower, Full Body).
+- **Plantillas**: el programa completo **ATLAS v2.0** (8 sesiones, 12 semanas, con series/reps/RIR del programa) y las divisiones clásicas (PPL, Upper/Lower, Full Body), sobre una biblioteca de 63 ejercicios.
 - **Rutinas**: ejercicios con series objetivo, rangos de reps y RIR, descansos por ejercicio y **superseries**.
-- **Entreno activo**: registro de peso/reps/RPE/RIR, tipos de serie (calentamiento, drop, fallo), autocompletar desde la última sesión, temporizador de descanso con notificación local y pantalla siempre encendida. El borrador se persiste en cada cambio: **cerrar la app no pierde el entreno**.
+- **Entreno activo**: registro de peso/reps/RPE/RIR, tipos de serie (calentamiento, drop, fallo), temporizador de descanso con notificación local y pantalla siempre encendida. Completar una serie en blanco **confirma los valores de la sesión anterior** que ya ves como referencia, en vez de guardar una serie vacía. El borrador se persiste en cada cambio: **cerrar la app no pierde el entreno**.
+- **Técnica por ejercicio**: instrucciones y vídeo guardado, con búsqueda directa en YouTube para cualquier ejercicio sin vídeo propio. Se abre en navegador in-app sin salir del entreno.
 - **Historial**: sesiones con detalle, estado de ánimo, notas y timeline de **PRs**.
 - **Progreso**: volumen semanal con selector de periodo (4/8/12/24 semanas) y **comparativa entre periodos**, distribución de rangos de reps, peso corporal, medidas, progresión por ejercicio con **e1RM** y **proyección a 12 semanas** (regresión lineal), todo en gráficas interactivas (toca/arrastra para ver el valor exacto).
 - **Inteligencia semanal**: alertas de consistencia, cobertura muscular, desequilibrios, sugerencia de deload y detección de fatiga (RPE alto sostenido).
 - **Reordenar ejercicios por arrastre** en el editor de rutinas (asa de arrastre + flechas como alternativa accesible).
 - **Importador desde la PWA**: trae tu historial completo (ejercicios, rutinas, sesiones, peso, medidas) desde un backup JSON exportado de la app web, fusionándolo sin pisar nunca un dato local más reciente.
 - **Offline-first**: todo se lee y escribe en local; una cola de operaciones sincroniza con Supabase cuando hay conexión (last-write-wins por `updatedAt`).
+- **Datos canónicos en kg**: el peso se guarda siempre en kilos y se convierte solo en el límite de entrada/salida, así cambiar entre kg y lbs nunca altera el histórico.
+- **Accesible**: los tres niveles de texto pasan contraste WCAG AA y todo control interactivo respeta el suelo táctil de 44 px (importa: el check de completar serie se pulsa con las manos sudadas).
+
+## Marca
+
+El icono es un monograma "G" cuyo travesaño es la barra de una mancuerna, en lima
+eléctrico (`#c8ff2e`) sobre negro (`#08080a`). Se genera desde una única fuente
+vectorial, así que se puede retocar y regenerar todo el juego (iOS, adaptativo
+Android, monocromo y splash) con:
+
+```bash
+node scripts/generate-icons.mjs
+```
 
 ## Estructura
 

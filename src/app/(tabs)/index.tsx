@@ -134,16 +134,13 @@ export default function Home() {
           </Card>
         </View>
 
-        {/* Carga muscular semanal */}
-        <View style={{ gap: spacing.sm }}>
-          <SectionTitle title="Carga semanal por grupo muscular" subtitle="Volumen de los últimos 7 días" />
-          <Card style={{ gap: spacing.md }}>
-            {muscleLoad.filter((m) => m.isWorked).length === 0 ? (
-              <Text style={{ color: colors.textDim, fontSize: font.size.sm }}>
-                Sin volumen registrado esta semana.
-              </Text>
-            ) : (
-              muscleLoad
+        {/* Carga muscular semanal — oculta mientras no hay carga que mostrar,
+            en vez de gastar espacio repitiendo que no hay datos. */}
+        {muscleLoad.some((m) => m.isWorked) && (
+          <View style={{ gap: spacing.sm }}>
+            <SectionTitle title="Carga semanal por grupo muscular" subtitle="Volumen de los últimos 7 días" />
+            <Card style={{ gap: spacing.md }}>
+              {muscleLoad
                 .filter((m) => m.isWorked)
                 .map((m) => (
                   <View key={m.group} style={{ gap: 4 }}>
@@ -166,10 +163,10 @@ export default function Home() {
                       />
                     </View>
                   </View>
-                ))
-            )}
-          </Card>
-        </View>
+                ))}
+            </Card>
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );

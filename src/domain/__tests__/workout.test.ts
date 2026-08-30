@@ -60,6 +60,48 @@ describe('estado del entreno', () => {
     assert.equal(exs[0].sets[0].weight, ''); // original intacto
   });
 
+  it('completar una serie en blanco confirma los valores de la sesión anterior', () => {
+    const lastSets = [mkDoneSet(62.5, 6), mkDoneSet(62.5, 6)];
+    const exs = buildInitialExercises(mkRoutine(['e1']));
+    const next = toggleSetCompleted(exs, 0, 0, lastSets);
+    assert.equal(next[0].sets[0].completed, true);
+    assert.equal(next[0].sets[0].weight, '62.5');
+    assert.equal(next[0].sets[0].reps, '6');
+  });
+
+  it('nunca pisa lo que el usuario ya ha escrito', () => {
+    const lastSets = [mkDoneSet(62.5, 6)];
+    let exs = buildInitialExercises(mkRoutine(['e1']));
+    exs = updateSetField(exs, 0, 0, 'weight', '70');
+    const next = toggleSetCompleted(exs, 0, 0, lastSets);
+    assert.equal(next[0].sets[0].weight, '70'); // lo escrito manda
+    assert.equal(next[0].sets[0].reps, '6'); // el hueco sí se rellena
+  });
+
+  it('no inventa valores si no hay referencia (planchas, carries)', () => {
+    const exs = buildInitialExercises(mkRoutine(['e1']));
+    const next = toggleSetCompleted(exs, 0, 0, []);
+    assert.equal(next[0].sets[0].completed, true);
+    assert.equal(next[0].sets[0].weight, '');
+    assert.equal(next[0].sets[0].reps, '');
+  });
+
+  it('al desmarcar no reescribe lo registrado', () => {
+    const lastSets = [mkDoneSet(62.5, 6)];
+    let exs = buildInitialExercises(mkRoutine(['e1']));
+    exs = toggleSetCompleted(exs, 0, 0, lastSets); // completa → 62.5 x 6
+    exs = toggleSetCompleted(exs, 0, 0, lastSets); // descompleta
+    assert.equal(exs[0].sets[0].completed, false);
+    assert.equal(exs[0].sets[0].weight, '62.5'); // se conserva lo registrado
+  });
+
+  it('las series extra heredan la última referencia disponible', () => {
+    const lastSets = [mkDoneSet(60, 8), mkDoneSet(62.5, 6)];
+    let exs = buildInitialExercises(mkRoutine(['e1'])); // 3 series, solo hay 2 de referencia
+    exs = toggleSetCompleted(exs, 0, 2, lastSets);
+    assert.equal(exs[0].sets[2].weight, '62.5'); // hereda la última
+  });
+
   it('añade y quita series (sin bajar de 1)', () => {
     let exs = buildInitialExercises(mkRoutine(['e1']));
     exs = appendSet(exs, 0, 'drop');

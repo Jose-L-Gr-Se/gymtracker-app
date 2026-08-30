@@ -9,7 +9,6 @@
     "userInterfaceStyle": "dark",
     "backgroundColor": "#08080a",
     "ios": {
-      "icon": "./assets/expo.icon",
       "bundleIdentifier": "com.joselgrse.gymtracker",
       "supportsTablet": false,
       "infoPlist": {
@@ -37,7 +36,7 @@
         {
           "backgroundColor": "#08080a",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 96
+          "imageWidth": 148
         }
       ],
       "expo-notifications"

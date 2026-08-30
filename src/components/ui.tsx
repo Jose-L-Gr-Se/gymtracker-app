@@ -12,7 +12,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 
-import { colors, font, radius, spacing } from '@/theme/tokens';
+import { colors, font, radius, spacing, TAP } from '@/theme/tokens';
 
 /** Kit UI mínimo y consistente de la app. Sin dependencias externas. */
 
@@ -105,6 +105,8 @@ export function Chip({
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
+      accessibilityState={{ selected: active }}
+      hitSlop={small ? { top: 4, bottom: 4 } : undefined}
       style={({ pressed }) => [
         styles.chip,
         small && styles.chipSmall,
@@ -174,12 +176,15 @@ const styles = StyleSheet.create({
   },
   btn: {
     borderRadius: radius.md,
+    minHeight: TAP,
     paddingVertical: 14,
     paddingHorizontal: spacing.xl,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  // "small" reduce el ancho y la tipografía, nunca por debajo del suelo táctil.
   btnSmall: {
+    minHeight: TAP,
     paddingVertical: 8,
     paddingHorizontal: spacing.lg,
   },
@@ -223,12 +228,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.borderLight,
     backgroundColor: colors.surface,
-    paddingHorizontal: spacing.md,
-    paddingVertical: 7,
+    paddingHorizontal: spacing.lg,
+    minHeight: TAP,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
+  // Los chips "small" viven en filas densas (filtros, grupos musculares):
+  // se compensa el alto reducido con hitSlop en el componente.
   chipSmall: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 4,
+    paddingHorizontal: spacing.md,
+    minHeight: 36,
   },
   chipLabel: {
     color: colors.textMuted,

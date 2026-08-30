@@ -47,7 +47,8 @@ interface WorkoutState {
   applyRoutineEdit: (routine: Routine) => void;
 
   setField: (exIndex: number, setIndex: number, field: 'weight' | 'reps' | 'rpe' | 'rir', value: string) => void;
-  toggleCompleted: (exIndex: number, setIndex: number) => void;
+  /** `lastSets` = series de la sesión anterior: al completar una en blanco se confirman esos valores. */
+  toggleCompleted: (exIndex: number, setIndex: number, lastSets?: SessionExercise['sets']) => void;
   cycleType: (exIndex: number, setIndex: number) => void;
   addSet: (exIndex: number, type?: SetType) => void;
   removeSet: (exIndex: number) => void;
@@ -139,8 +140,8 @@ export const useWorkout = create<WorkoutState>((set, get) => {
 
     setField: (exIndex, setIndex, field, value) =>
       update({ exercises: updateSetField(get().exercises, exIndex, setIndex, field, value) }),
-    toggleCompleted: (exIndex, setIndex) =>
-      update({ exercises: toggleSetCompleted(get().exercises, exIndex, setIndex) }),
+    toggleCompleted: (exIndex, setIndex, lastSets = []) =>
+      update({ exercises: toggleSetCompleted(get().exercises, exIndex, setIndex, lastSets) }),
     cycleType: (exIndex, setIndex) => update({ exercises: cycleSetType(get().exercises, exIndex, setIndex) }),
     addSet: (exIndex, type) => update({ exercises: appendSet(get().exercises, exIndex, type) }),
     removeSet: (exIndex) => update({ exercises: removeLastSet(get().exercises, exIndex) }),

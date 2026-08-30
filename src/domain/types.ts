@@ -133,14 +133,18 @@ export interface Prefs {
   keepScreenAwake: boolean;
 }
 
+/** Ejercicio dentro de una plantilla: los objetivos de reps/RIR son opcionales. */
+export type TemplateExercise = Pick<
+  RoutineExercise,
+  'exerciseId' | 'exerciseName' | 'targetSets' | 'restSeconds' | 'muscleGroup'
+> &
+  Partial<Pick<RoutineExercise, 'targetRepsMin' | 'targetRepsMax' | 'targetRirMin' | 'targetRirMax'>>;
+
 export interface WorkoutTemplate {
   id: string;
   name: string;
   desc: string;
-  exercises: Pick<
-    RoutineExercise,
-    'exerciseId' | 'exerciseName' | 'targetSets' | 'restSeconds' | 'muscleGroup'
-  >[];
+  exercises: TemplateExercise[];
 }
 
 /** Borrador de entreno activo, persistido para sobrevivir a cierres de app. */

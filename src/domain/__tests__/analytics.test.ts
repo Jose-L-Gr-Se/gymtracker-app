@@ -138,9 +138,17 @@ describe('calcWeeklyMuscleLoad', () => {
 });
 
 describe('calcWeeklyAlerts', () => {
-  it('semana en blanco', () => {
-    const alerts = calcWeeklyAlerts([], [], 3);
-    assert.equal(alerts[0]?.id, 'consistency-zero');
+  it('una cuenta que nunca ha entrenado no recibe ninguna alerta', () => {
+    assert.deepEqual(calcWeeklyAlerts([], [], 3), []);
+  });
+
+  it('semana en blanco solo si ya había entrenado antes', () => {
+    const sessions = [mkSession(daysAgo(30), [mkSessionExercise('e1', [mkDoneSet(80, 8)])])];
+    const alerts = calcWeeklyAlerts(sessions, [], 3);
+    const blank = alerts.find((a) => a.id === 'consistency-zero');
+    assert.ok(blank);
+    // Es información, no peligro: no debe usar el nivel más alto (rojo).
+    assert.equal(blank.level, 'medium');
   });
 
   it('objetivo semanal en riesgo y hueco muscular', () => {

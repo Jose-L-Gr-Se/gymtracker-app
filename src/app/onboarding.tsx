@@ -12,6 +12,7 @@ import {
   WORKOUT_TEMPLATES,
 } from '@/domain/constants';
 import type { ExperienceLevel, Goal, WeightUnit } from '@/domain/types';
+import { templateToRoutineExercises } from '@/domain/workout';
 import { useAppData } from '@/state/useAppData';
 import { useAuth } from '@/state/useAuth';
 import { colors, font, radius, spacing } from '@/theme/tokens';
@@ -43,17 +44,7 @@ export default function Onboarding() {
     await saveProfile({ fullName: name.trim(), goal, experience });
     const template = WORKOUT_TEMPLATES.find((t) => t.id === templateId);
     if (template) {
-      await saveRoutine({
-        name: template.name,
-        exercises: template.exercises.map((e) => ({
-          ...e,
-          linkedToNext: false,
-          targetRepsMin: null,
-          targetRepsMax: null,
-          targetRirMin: null,
-          targetRirMax: null,
-        })),
-      });
+      await saveRoutine({ name: template.name, exercises: templateToRoutineExercises(template) });
     }
     await setPrefs({ unitPref: unit, weeklyGoal, onboardingDone: true });
     setSaving(false);
@@ -114,7 +105,9 @@ export default function Onboarding() {
             <>
               <Title text="Empieza con una rutina" sub="Elige una plantilla o empieza desde cero." />
               <View style={{ gap: spacing.sm }}>
-                {WORKOUT_TEMPLATES.map((t) => (
+                {/* Solo las divisiones clásicas: los programas completos (ATLAS)
+                    tienen 8 sesiones y abrumarían aquí. Están en Rutinas → Plantillas. */}
+                {WORKOUT_TEMPLATES.filter((t) => !t.id.startsWith('tpl-atlas-')).map((t) => (
                   <SelectRow
                     key={t.id}
                     label={t.name}
@@ -123,8 +116,17 @@ export default function Onboarding() {
                     onPress={() => setTemplateId(t.id)}
                   />
                 ))}
-                <SelectRow label="Desde cero" sub="Crearé mis rutinas yo mismo" selected={templateId === null} onPress={() => setTemplateId(null)} />
+                <SelectRow
+                  label="Desde cero"
+                  sub="Crearé mis rutinas yo mismo"
+                  selected={templateId === null}
+                  onPress={() => setTemplateId(null)}
+                />
               </View>
+              <Text style={{ color: colors.textDim, fontSize: font.size.xs, lineHeight: 17 }}>
+                Después encontrarás más plantillas en Rutinas → Plantillas, incluido el programa
+                completo ATLAS v2.0 de 12 semanas.
+              </Text>
             </>
           )}
         </ScrollView>

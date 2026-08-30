@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
 import { Alert, Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -5,15 +6,17 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button, Card, Chip, Input, SectionTitle } from '@/components/ui';
 import { MUSCLE_GROUPS } from '@/domain/constants';
 import type { Exercise, MuscleGroup } from '@/domain/types';
+import { TechniqueBadge, TechniqueSheet } from '@/features/exercises/TechniqueSheet';
 import { useAppData } from '@/state/useAppData';
-import { colors, font, spacing } from '@/theme/tokens';
+import { colors, font, spacing, TAP } from '@/theme/tokens';
 
-/** Biblioteca de ejercicios: buscar, crear, editar y eliminar. */
+/** Biblioteca de ejercicios: buscar, crear, editar, eliminar y consultar técnica. */
 export default function ExerciseLibrary() {
   const { exercises, sessions, addExercise, updateExercise, deleteExercise } = useAppData();
   const [search, setSearch] = useState('');
   const [group, setGroup] = useState<MuscleGroup | null>(null);
   const [editing, setEditing] = useState<Exercise | 'new' | null>(null);
+  const [techniqueFor, setTechniqueFor] = useState<Exercise | null>(null);
 
   const usageCount = useMemo(() => {
     const map: Record<string, number> = {};
@@ -58,24 +61,53 @@ export default function ExerciseLibrary() {
         <ScrollView contentContainerStyle={{ gap: spacing.xs, paddingBottom: spacing.xxl }}>
           {filtered.map((ex) => (
             <Pressable key={ex.id} onPress={() => setEditing(ex)} onLongPress={() => confirmDelete(ex)}>
-              <Card style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingVertical: spacing.md }}>
+              <Card
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: spacing.sm,
+                  paddingVertical: spacing.md,
+                  minHeight: TAP,
+                }}
+              >
                 <View style={{ flex: 1 }}>
-                  <Text style={{ color: colors.text, fontSize: font.size.md, fontWeight: font.weight.semibold }}>
-                    {ex.name} {ex.isCustom ? <Text style={{ color: colors.accent, fontSize: font.size.xs }}>●</Text> : null}
-                  </Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                    <Text
+                      style={{
+                        color: colors.text,
+                        fontSize: font.size.md,
+                        fontWeight: font.weight.semibold,
+                        flexShrink: 1,
+                      }}
+                    >
+                      {ex.name}
+                    </Text>
+                    {ex.isCustom ? <Text style={{ color: colors.accent, fontSize: font.size.xs }}>●</Text> : null}
+                    <TechniqueBadge exercise={ex} />
+                  </View>
                   <Text style={{ color: colors.textDim, fontSize: font.size.xs }}>
                     {ex.muscleGroup} · descanso {ex.defaultRest}s
                     {usageCount[ex.id] ? ` · ${usageCount[ex.id]} sesiones` : ''}
                   </Text>
                 </View>
+                <Pressable
+                  onPress={() => setTechniqueFor(ex)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Ver técnica de ${ex.name}`}
+                  style={{ width: TAP, height: TAP, alignItems: 'center', justifyContent: 'center' }}
+                >
+                  <Ionicons name="play-circle-outline" size={24} color={colors.accent} />
+                </Pressable>
               </Card>
             </Pressable>
           ))}
           <Text style={{ color: colors.textDim, fontSize: font.size.xs, textAlign: 'center', marginTop: spacing.sm }}>
-            Toca para editar · mantén pulsado para eliminar
+            Toca para editar · mantén pulsado para eliminar · ▶ para ver técnica
           </Text>
         </ScrollView>
       </View>
+
+      <TechniqueSheet exercise={techniqueFor} onClose={() => setTechniqueFor(null)} />
 
       {editing !== null && (
         <ExerciseForm

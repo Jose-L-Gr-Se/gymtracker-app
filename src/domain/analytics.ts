@@ -196,14 +196,20 @@ export function calcWeeklyAlerts(
   weeklyGoal: number,
   today = new Date(),
 ): WeeklyAlert[] {
+  // Una cuenta que nunca ha entrenado no tiene nada que corregir: avisarla de
+  // "semana en blanco" y "cobertura muscular incompleta" el primer día, antes
+  // de su primera sesión, es ruido que además arranca en tono de alarma.
+  if (sessions.length === 0) return [];
+
   const goal = Math.min(14, Math.max(1, Math.round(weeklyGoal) || 3));
   const last7 = inLastNDays(sessions, 7, today);
   const alerts: WeeklyAlert[] = [];
 
   if (last7.length === 0) {
     alerts.push({
+      // Es información, no un peligro: va en ámbar, no en el rojo de "eliminar rutina".
       id: 'consistency-zero',
-      level: 'high',
+      level: 'medium',
       title: 'Semana en blanco',
       message: 'No registraste entrenos en los últimos 7 días. Empieza con 1 sesión corta para retomar el ritmo.',
     });

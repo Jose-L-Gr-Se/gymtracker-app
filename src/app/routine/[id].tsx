@@ -11,7 +11,7 @@ import { MUSCLE_GROUPS } from '@/domain/constants';
 import type { Exercise, MuscleGroup, RoutineExercise } from '@/domain/types';
 import { useAppData } from '@/state/useAppData';
 import { useWorkout } from '@/state/useWorkout';
-import { colors, font, radius, spacing } from '@/theme/tokens';
+import { colors, font, radius, spacing, TAP } from '@/theme/tokens';
 
 /** Editor de rutina: nombre, ejercicios, objetivos y superseries. */
 export default function RoutineEditor() {
@@ -180,8 +180,19 @@ function IconBtn({
   color?: string;
 }) {
   return (
-    <Pressable onPress={onPress} disabled={disabled} hitSlop={8} style={{ opacity: disabled ? 0.3 : 1 }}>
-      <Ionicons name={name} size={20} color={color} />
+    <Pressable
+      onPress={onPress}
+      disabled={disabled}
+      accessibilityRole="button"
+      style={{
+        width: TAP,
+        height: TAP,
+        alignItems: 'center',
+        justifyContent: 'center',
+        opacity: disabled ? 0.3 : 1,
+      }}
+    >
+      <Ionicons name={name} size={22} color={color} />
     </Pressable>
   );
 }
@@ -336,8 +347,8 @@ function ExercisePicker({
 }
 
 const stepBtn = {
-  width: 34,
-  height: 34,
+  width: TAP,
+  height: TAP,
   borderRadius: radius.sm,
   backgroundColor: colors.surface,
   borderWidth: 1,
@@ -348,6 +359,7 @@ const stepBtn = {
 
 const rangeInput = {
   flex: 1,
+  minHeight: TAP,
   backgroundColor: colors.surface,
   borderWidth: 1,
   borderColor: colors.borderLight,

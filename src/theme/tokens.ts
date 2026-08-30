@@ -12,9 +12,12 @@ export const colors = {
   border: '#222228',
   borderLight: '#2e2e36',
 
-  text: '#f0f0f5',
-  textMuted: '#8888a0',
-  textDim: '#55556a',
+  // Los tres niveles de texto pasan WCAG AA sobre el fondo (#08080a).
+  // textDim estaba en #55556a = 2.75:1, por debajo incluso del 3:1 de
+  // texto grande, y se usaba a 11px en labels y metadatos por toda la app.
+  text: '#f0f0f5', // ~17:1
+  textMuted: '#9797ae', // 7.0:1
+  textDim: '#78788e', // 4.65:1
 
   accent: '#c8ff2e',
   accentDim: 'rgba(200,255,46,0.12)',
@@ -47,6 +50,13 @@ export const radius = {
   xl: 24,
   full: 999,
 } as const;
+
+/**
+ * Suelo táctil (Apple HIG / Material): ningún control interactivo debe medir
+ * menos que esto. Crítico en el entreno activo, donde el check de completar
+ * serie es la acción más repetida de la app y se pulsa con las manos sudadas.
+ */
+export const TAP = 44;
 
 export const font = {
   size: {

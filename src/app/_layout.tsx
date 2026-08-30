@@ -65,6 +65,7 @@ export default function RootLayout() {
           <Stack.Screen name="exercise/[id]" options={{ title: 'Progresión' }} />
           <Stack.Screen name="exercises" options={{ title: 'Biblioteca de ejercicios' }} />
           <Stack.Screen name="import-pwa" options={{ title: 'Importar desde la PWA' }} />
+          <Stack.Screen name="templates" options={{ title: 'Plantillas' }} />
         </Stack>
       </SafeAreaProvider>
     </GestureHandlerRootView>

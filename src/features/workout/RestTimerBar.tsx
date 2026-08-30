@@ -1,11 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useEffect, useRef, useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { calcRemainingSeconds } from '@/domain/workout';
 import type { RestTimerState } from '@/domain/types';
-import { colors, font, radius, spacing } from '@/theme/tokens';
+import { colors, font, radius, spacing, TAP } from '@/theme/tokens';
 
 /**
  * Barra fija de descanso. El tiempo se deriva de endAtMs (reloj de pared),
@@ -73,13 +73,32 @@ export function RestTimerBar({
             Descanso · {timer.exerciseName}
           </Text>
         </View>
-        <Pressable onPress={paused ? onResume : onPause} hitSlop={8}>
-          <Ionicons name={paused ? 'play' : 'pause'} size={24} color={colors.text} />
+        <Pressable
+          onPress={paused ? onResume : onPause}
+          accessibilityRole="button"
+          accessibilityLabel={paused ? 'Reanudar descanso' : 'Pausar descanso'}
+          style={styles.timerBtn}
+        >
+          <Ionicons name={paused ? 'play' : 'pause'} size={26} color={colors.text} />
         </Pressable>
-        <Pressable onPress={onSkip} hitSlop={8}>
-          <Ionicons name="play-skip-forward" size={24} color={colors.textMuted} />
+        <Pressable
+          onPress={onSkip}
+          accessibilityRole="button"
+          accessibilityLabel="Saltar descanso"
+          style={styles.timerBtn}
+        >
+          <Ionicons name="play-skip-forward" size={26} color={colors.textMuted} />
         </Pressable>
       </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  timerBtn: {
+    width: TAP,
+    height: TAP,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});
