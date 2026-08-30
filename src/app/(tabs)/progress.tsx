@@ -1,13 +1,16 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Alert, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { Alert, Pressable, Text, TextInput, View } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { BarChart } from '@/components/charts/BarChart';
 import { Button, Card, Chip, EmptyState, SectionTitle } from '@/components/ui';
 import {
   calcBodyWeightTrend,
   calcMeasurementTrends,
+  calcPeriodComparison,
   calcRepRangeDistribution,
   calcWeeklyVolumeTrend,
 } from '@/domain/analytics';
@@ -17,11 +20,15 @@ import { formatWeight, toStoredKg, weightUnitLabel } from '@/domain/units';
 import { useAppData } from '@/state/useAppData';
 import { colors, font, radius, spacing } from '@/theme/tokens';
 
+const PERIOD_OPTIONS = [4, 8, 12, 24];
+
 export default function Progress() {
   const { sessions, exercises, bodyWeight, measurements, prefs, addBodyWeight, deleteBodyWeight, addMeasurement } =
     useAppData();
 
-  const volumeTrend = useMemo(() => calcWeeklyVolumeTrend(sessions, 8), [sessions]);
+  const [periodWeeks, setPeriodWeeks] = useState(8);
+  const volumeTrend = useMemo(() => calcWeeklyVolumeTrend(sessions, periodWeeks), [sessions, periodWeeks]);
+  const periodComparison = useMemo(() => calcPeriodComparison(sessions, periodWeeks), [sessions, periodWeeks]);
   const repRange = useMemo(() => calcRepRangeDistribution(sessions), [sessions]);
   const bwTrend = useMemo(() => calcBodyWeightTrend(bodyWeight), [bodyWeight]);
   const msTrends = useMemo(() => calcMeasurementTrends(measurements), [measurements]);
@@ -55,10 +62,10 @@ export default function Progress() {
       <ScrollView contentContainerStyle={{ padding: spacing.lg, gap: spacing.lg, paddingBottom: spacing.xxl }}>
         <SectionTitle title="Progreso" subtitle="Tendencias de volumen, cuerpo y fuerza" />
 
-        {/* Volumen semanal */}
+        {/* Volumen semanal con selector de periodo y comparativa */}
         <Card style={{ gap: spacing.md }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Text style={CARD_TITLE}>Volumen semanal (8 sem.)</Text>
+            <Text style={CARD_TITLE}>Volumen semanal</Text>
             {volumeTrend.trend !== 0 && (
               <Text
                 style={{
@@ -67,26 +74,48 @@ export default function Progress() {
                   fontWeight: font.weight.bold,
                 }}
               >
-                {volumeTrend.trend > 0 ? '▲' : '▼'} {Math.abs(volumeTrend.trend)}%
+                {volumeTrend.trend > 0 ? '▲' : '▼'} {Math.abs(volumeTrend.trend)}% vs. sem. anterior
               </Text>
             )}
           </View>
-          <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: spacing.xs, height: 96 }}>
-            {volumeTrend.weeks.map((w) => (
-              <View key={w.weekStart} style={{ flex: 1, alignItems: 'center', gap: 4, height: '100%', justifyContent: 'flex-end' }}>
-                <View
-                  style={{
-                    width: '70%',
-                    height: `${Math.max(w.pct, w.volume > 0 ? 8 : 2)}%`,
-                    borderRadius: 3,
-                    backgroundColor: w.volume > 0 ? colors.accent : colors.surface,
-                  }}
-                />
-                <Text style={{ color: colors.textDim, fontSize: 8 }} numberOfLines={1}>
-                  {w.label}
-                </Text>
-              </View>
+
+          <View style={{ flexDirection: 'row', gap: spacing.xs }}>
+            {PERIOD_OPTIONS.map((n) => (
+              <Chip key={n} label={`${n} sem.`} small active={periodWeeks === n} onPress={() => setPeriodWeeks(n)} />
             ))}
+          </View>
+
+          <BarChart
+            data={volumeTrend.weeks.map((w) => ({ label: w.label, value: w.volume }))}
+            formatValue={(v) => `${formatWeight(v, prefs.unitPref)} ${weightUnitLabel(prefs.unitPref)}`}
+          />
+
+          <View style={{ borderTopWidth: 1, borderTopColor: colors.border, paddingTop: spacing.sm, gap: 2 }}>
+            <Text style={{ color: colors.textMuted, fontSize: font.size.xs }}>
+              Estas {periodWeeks} semanas vs. las {periodWeeks} anteriores
+            </Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Text style={{ color: colors.text, fontSize: font.size.md, fontWeight: font.weight.bold }}>
+                {formatWeight(periodComparison.currentVolume, prefs.unitPref)} {weightUnitLabel(prefs.unitPref)}
+                <Text style={{ color: colors.textDim, fontSize: font.size.xs, fontWeight: font.weight.regular }}>
+                  {'  '}({periodComparison.currentSessions} sesiones)
+                </Text>
+              </Text>
+              {periodComparison.volumeChangePct !== null ? (
+                <Text
+                  style={{
+                    color: periodComparison.volumeChangePct >= 0 ? colors.success : colors.warning,
+                    fontSize: font.size.sm,
+                    fontWeight: font.weight.bold,
+                  }}
+                >
+                  {periodComparison.volumeChangePct > 0 ? '+' : ''}
+                  {periodComparison.volumeChangePct}%
+                </Text>
+              ) : (
+                <Text style={{ color: colors.textDim, fontSize: font.size.xs }}>sin periodo previo</Text>
+              )}
+            </View>
           </View>
         </Card>
 

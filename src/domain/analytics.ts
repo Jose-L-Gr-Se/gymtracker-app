@@ -345,6 +345,42 @@ export function calcWeeklyVolumeTrend(
   return { weeks: withPct, trend };
 }
 
+// ── Comparativa entre periodos (N semanas actuales vs N anteriores) ──
+
+export interface PeriodComparison {
+  weeks: number;
+  currentVolume: number;
+  previousVolume: number;
+  currentSessions: number;
+  previousSessions: number;
+  /** % de cambio de volumen; null si no hay volumen previo con el que comparar. */
+  volumeChangePct: number | null;
+}
+
+export function calcPeriodComparison(sessions: Session[], weeks: number, today = new Date()): PeriodComparison {
+  const n = Math.max(1, Math.round(weeks));
+  const currentEnd = today;
+  const currentStart = new Date(currentEnd.getTime() - (n * 7 - 1) * DAY_MS);
+  const previousEnd = new Date(currentStart.getTime() - DAY_MS);
+  const previousStart = new Date(previousEnd.getTime() - (n * 7 - 1) * DAY_MS);
+
+  const inRange = (fromKey: string, toKey: string) => sessions.filter((s) => s.date >= fromKey && s.date <= toKey);
+  const current = inRange(localDateKey(currentStart), localDateKey(currentEnd));
+  const previous = inRange(localDateKey(previousStart), localDateKey(previousEnd));
+
+  const currentVolume = Math.round(current.reduce((sum, s) => sum + sessionVolume(s), 0));
+  const previousVolume = Math.round(previous.reduce((sum, s) => sum + sessionVolume(s), 0));
+
+  return {
+    weeks: n,
+    currentVolume,
+    previousVolume,
+    currentSessions: current.length,
+    previousSessions: previous.length,
+    volumeChangePct: previousVolume > 0 ? Math.round(((currentVolume - previousVolume) / previousVolume) * 100) : null,
+  };
+}
+
 // ── Distribución de rangos de repeticiones (7 días) ───────────
 
 export interface RepRangeDistribution {

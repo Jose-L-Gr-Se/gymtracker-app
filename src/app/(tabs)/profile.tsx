@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { useState } from 'react';
 import { Alert, ScrollView, Switch, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -148,6 +149,20 @@ export default function Profile() {
             <Button title="Sincronizar ahora" small variant="secondary" loading={syncing} onPress={() => void sync()} />
           </Card>
         )}
+
+        {/* Datos */}
+        <Card style={{ gap: spacing.md }}>
+          <Text style={CARD_TITLE}>Datos</Text>
+          <Text style={{ color: colors.textMuted, fontSize: font.size.sm }}>
+            ¿Vienes de la app web de GymTracker? Trae tu historial sin perder nada de lo que ya tengas aquí.
+          </Text>
+          <Button
+            title="Importar desde la PWA"
+            small
+            variant="secondary"
+            onPress={() => router.push('/import-pwa')}
+          />
+        </Card>
 
         <Button title={isGuest ? 'Salir del modo invitado' : 'Cerrar sesión'} variant="danger" onPress={confirmSignOut} />
         <Text style={{ color: colors.textDim, fontSize: font.size.xs, textAlign: 'center' }}>

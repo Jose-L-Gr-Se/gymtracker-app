@@ -6,6 +6,7 @@ import {
   calcBodyWeightTrend,
   calcExerciseProgression,
   calcInsights,
+  calcPeriodComparison,
   calcProjectedProgress,
   calcRepRangeDistribution,
   calcSuggestion,
@@ -173,6 +174,28 @@ describe('calcWeeklyVolumeTrend', () => {
     assert.equal(weeks.length, 8);
     assert.equal(weeks[7].volume, 1000);
     assert.equal(weeks[0].volume, 0);
+  });
+});
+
+describe('calcPeriodComparison', () => {
+  it('compara el volumen del periodo actual contra el mismo número de semanas anterior', () => {
+    const sessions = [
+      // Periodo actual (últimas 2 semanas): 1000
+      mkSession(daysAgo(3), [mkSessionExercise('e1', [mkDoneSet(100, 10)])]),
+      // Periodo previo (2 semanas antes de esas): 400
+      mkSession(daysAgo(20), [mkSessionExercise('e1', [mkDoneSet(40, 10)])]),
+    ];
+    const cmp = calcPeriodComparison(sessions, 2);
+    assert.equal(cmp.currentVolume, 1000);
+    assert.equal(cmp.previousVolume, 400);
+    assert.equal(cmp.volumeChangePct, 150);
+  });
+
+  it('devuelve null en el cambio porcentual si no hay volumen previo', () => {
+    const sessions = [mkSession(daysAgo(1), [mkSessionExercise('e1', [mkDoneSet(100, 10)])])];
+    const cmp = calcPeriodComparison(sessions, 4);
+    assert.equal(cmp.previousVolume, 0);
+    assert.equal(cmp.volumeChangePct, null);
   });
 });
 

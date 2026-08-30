@@ -9,22 +9,24 @@ App nativa de seguimiento de entrenamiento (Android e iOS) construida con **Expo
 - **Rutinas**: ejercicios con series objetivo, rangos de reps y RIR, descansos por ejercicio y **superseries**.
 - **Entreno activo**: registro de peso/reps/RPE/RIR, tipos de serie (calentamiento, drop, fallo), autocompletar desde la última sesión, temporizador de descanso con notificación local y pantalla siempre encendida. El borrador se persiste en cada cambio: **cerrar la app no pierde el entreno**.
 - **Historial**: sesiones con detalle, estado de ánimo, notas y timeline de **PRs**.
-- **Progreso**: volumen semanal (8 semanas), distribución de rangos de reps, peso corporal, medidas, progresión por ejercicio con **e1RM** y **proyección a 12 semanas** (regresión lineal).
+- **Progreso**: volumen semanal con selector de periodo (4/8/12/24 semanas) y **comparativa entre periodos**, distribución de rangos de reps, peso corporal, medidas, progresión por ejercicio con **e1RM** y **proyección a 12 semanas** (regresión lineal), todo en gráficas interactivas (toca/arrastra para ver el valor exacto).
 - **Inteligencia semanal**: alertas de consistencia, cobertura muscular, desequilibrios, sugerencia de deload y detección de fatiga (RPE alto sostenido).
+- **Reordenar ejercicios por arrastre** en el editor de rutinas (asa de arrastre + flechas como alternativa accesible).
+- **Importador desde la PWA**: trae tu historial completo (ejercicios, rutinas, sesiones, peso, medidas) desde un backup JSON exportado de la app web, fusionándolo sin pisar nunca un dato local más reciente.
 - **Offline-first**: todo se lee y escribe en local; una cola de operaciones sincroniza con Supabase cuando hay conexión (last-write-wins por `updatedAt`).
 
 ## Estructura
 
 ```
 src/
-  domain/      Tipos, constantes, sanitización y analítica (funciones puras, con tests)
+  domain/      Tipos, constantes, sanitización, analítica e importador de la PWA (funciones puras, con tests)
   data/        Almacén local (AsyncStorage), cola de sync y motor push/pull
   services/    Cliente Supabase y notificaciones locales
   state/       Stores zustand: useAuth, useAppData, useWorkout
-  components/  Kit UI (Button, Card, Input, Chip, …)
+  components/  Kit UI (Button, Card, Input, Chip, …), ReorderableList, charts/ (BarChart, LineChart)
   features/    Componentes de features (RestTimerBar, …)
   theme/       Design tokens
-  app/         Rutas expo-router: (auth), onboarding, (tabs), workout, routine/[id], …
+  app/         Rutas expo-router: (auth), onboarding, (tabs), workout, routine/[id], import-pwa, …
 supabase/schema.sql   Esquema SQL (tablas + RLS + trigger de perfil)
 ```
 
@@ -96,10 +98,10 @@ El historial de la app queda como `main` del nuevo repo.
 
 ## Roadmap sugerido
 
+- [x] Importador de datos desde la PWA (export JSON → import en la app), fusión sin pérdida de datos.
+- [x] Reordenar ejercicios con drag & drop (implementación propia sobre gesture-handler + reanimated).
+- [x] Gráficas interactivas (react-native-svg) con comparativa entre periodos.
 - [ ] Migrar el almacén local de AsyncStorage a SQLite (`expo-sqlite`) cuando crezca el volumen de sesiones.
-- [ ] Importador de datos desde la PWA (export JSON → import en la app).
-- [ ] Reordenar ejercicios con drag & drop (`react-native-draggable-flatlist`).
-- [ ] Gráficas avanzadas (victory-native) y comparativas entre periodos.
 - [ ] Widget/Live Activity del temporizador de descanso.
 - [ ] Monetización: plan Pro (analítica avanzada, coach automático) vía RevenueCat.
 - [ ] Localización EN (los strings están en español; extraerlos a i18n).

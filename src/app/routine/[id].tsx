@@ -1,10 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Alert, Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { Alert, Modal, Pressable, Text, TextInput, View } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button, Card, Chip, Divider, Input, SectionTitle } from '@/components/ui';
+import { ReorderableList } from '@/components/ReorderableList';
 import { MUSCLE_GROUPS } from '@/domain/constants';
 import type { Exercise, MuscleGroup, RoutineExercise } from '@/domain/types';
 import { useAppData } from '@/state/useAppData';
@@ -78,9 +80,20 @@ export default function RoutineEditor() {
           <Button title="+ Añadir" small variant="secondary" onPress={() => setPickerOpen(true)} />
         </View>
 
-        {items.map((it, i) => (
-          <Card key={`${it.exerciseId}_${i}`} style={{ gap: spacing.md }}>
+        {items.length > 1 ? (
+          <Text style={{ color: colors.textDim, fontSize: font.size.xs, marginTop: -spacing.sm }}>
+            Mantén pulsada la asa ⠿ para arrastrar, o usa las flechas.
+          </Text>
+        ) : null}
+
+        <ReorderableList
+          data={items}
+          keyExtractor={(it) => it.exerciseId}
+          onReorder={setItems}
+          renderItem={(it, i, dragHandle) => (
+          <Card style={{ gap: spacing.md }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+              {dragHandle}
               <View style={{ flex: 1 }}>
                 <Text style={{ color: colors.text, fontSize: font.size.md, fontWeight: font.weight.bold }}>
                   {it.exerciseName}
@@ -134,7 +147,8 @@ export default function RoutineEditor() {
               </Pressable>
             )}
           </Card>
-        ))}
+          )}
+        />
 
         <Button title={isNew ? 'Crear rutina' : 'Guardar cambios'} loading={saving} onPress={() => void save()} />
       </ScrollView>

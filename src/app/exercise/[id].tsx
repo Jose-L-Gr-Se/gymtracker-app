@@ -1,8 +1,10 @@
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useMemo } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { LineChart } from '@/components/charts/LineChart';
 import { Card, EmptyState, StatTile } from '@/components/ui';
 import { calcExerciseProgression, calcProjectedProgress } from '@/domain/analytics';
 import { formatWeight, weightUnitLabel } from '@/domain/units';
@@ -19,7 +21,6 @@ export default function ExerciseProgression() {
   const projection = useMemo(() => calcProjectedProgress(id ?? '', sessions, 12), [id, sessions]);
 
   const unit = weightUnitLabel(prefs.unitPref);
-  const maxWeight = Math.max(...progression.points.map((p) => p.bestWeight), 1);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }} edges={['bottom']}>
@@ -50,27 +51,21 @@ export default function ExerciseProgression() {
               </Card>
             )}
 
-            {/* Gráfico de barras del mejor peso por sesión */}
+            {/* Gráfica de mejor peso por sesión, con PRs destacados */}
             <Card style={{ gap: spacing.md }}>
               <Text style={{ color: colors.text, fontSize: font.size.md, fontWeight: font.weight.bold }}>
                 Mejor peso por sesión
               </Text>
-              <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 3, height: 110 }}>
-                {progression.points.slice(-16).map((p, i) => (
-                  <View key={`${p.date}_${i}`} style={{ flex: 1, height: '100%', justifyContent: 'flex-end', alignItems: 'center' }}>
-                    <View
-                      style={{
-                        width: '80%',
-                        height: `${Math.max(6, (p.bestWeight / maxWeight) * 100)}%`,
-                        borderRadius: 3,
-                        backgroundColor: p.isPR ? colors.gold : colors.accent,
-                      }}
-                    />
-                  </View>
-                ))}
-              </View>
+              <LineChart
+                data={progression.points.slice(-24).map((p) => ({
+                  label: p.date,
+                  value: p.bestWeight,
+                  highlight: p.isPR,
+                }))}
+                formatValue={(v) => `${formatWeight(v, prefs.unitPref)} ${unit}`}
+              />
               <Text style={{ color: colors.textDim, fontSize: font.size.xs }}>
-                Últimas {Math.min(16, progression.points.length)} sesiones · las barras doradas son PR.
+                Últimas {Math.min(24, progression.points.length)} sesiones · arrastra para explorar · los puntos dorados son PR.
               </Text>
             </Card>
 

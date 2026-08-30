@@ -12,6 +12,7 @@ import {
 } from '@/data/repository';
 import { bodyWeightRowId, measurementRowId, runSync } from '@/data/syncEngine';
 import { nowIso, uid } from '@/domain/id';
+import { mergeBodyWeight, mergeById, mergeMeasurements, parsePwaBackup, type PwaImportSummary } from '@/domain/importPwa';
 import { buildExercise, DEFAULT_PREFS, sanitizePrefs } from '@/domain/sanitize';
 import type {
   BodyWeightEntry,
@@ -73,6 +74,9 @@ interface AppDataState {
   deleteMeasurement: (date: string, type: string) => Promise<void>;
 
   setPrefs: (patch: Partial<Prefs>) => Promise<void>;
+
+  /** Importa un backup JSON exportado desde la PWA, fusionando con los datos locales. */
+  importPwaBackup: (rawText: string) => Promise<PwaImportSummary>;
 }
 
 export const useAppData = create<AppDataState>((set, get) => {
@@ -291,6 +295,66 @@ export const useAppData = create<AppDataState>((set, get) => {
       const prefs = sanitizePrefs({ ...get().prefs, ...patch });
       set({ prefs });
       await savePrefs(userId, prefs);
+    },
+
+    importPwaBackup: async (rawText) => {
+      const userId = requireUser();
+      const deviceId = await getDeviceId();
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(rawText);
+      } catch {
+        throw new Error('El archivo no es JSON válido.');
+      }
+      const backup = parsePwaBackup(parsed, deviceId);
+      const state = get();
+
+      const exercises = mergeById(state.exercises, backup.exercises);
+      const routines = mergeById(state.routines, backup.routines);
+      const sessions = mergeById(state.sessions, backup.sessions);
+      const bodyWeight = mergeBodyWeight(state.bodyWeight, backup.bodyWeight);
+      const measurements = mergeMeasurements(state.measurements, backup.measurements);
+
+      set({
+        exercises: exercises.merged,
+        routines: routines.merged,
+        sessions: sessions.merged,
+        bodyWeight: bodyWeight.merged,
+        measurements: measurements.merged,
+      });
+      await Promise.all([
+        saveExercises(userId, exercises.merged),
+        saveRoutines(userId, routines.merged),
+        saveSessions(userId, sessions.merged),
+        saveBodyWeight(userId, bodyWeight.merged),
+        saveMeasurements(userId, measurements.merged),
+      ]);
+
+      // Solo se suben las entidades que el merge marcó como realmente añadidas o actualizadas.
+      if (!state.isGuest) {
+        const ops = [
+          ...exercises.changed.map((e) => buildOp('exercises', e.id, 'upsert', e as unknown as Record<string, unknown>)),
+          ...routines.changed.map((r) => buildOp('routines', r.id, 'upsert', r as unknown as Record<string, unknown>)),
+          ...sessions.changed.map((s) => buildOp('sessions', s.id, 'upsert', s as unknown as Record<string, unknown>)),
+          ...bodyWeight.changed.map((e) => buildOp('body_weight', bodyWeightRowId(e), 'upsert', e as unknown as Record<string, unknown>)),
+          ...measurements.changed.map((e) => buildOp('measurements', measurementRowId(e), 'upsert', e as unknown as Record<string, unknown>)),
+        ];
+        for (const op of ops) {
+          await enqueueOp(userId, op);
+        }
+        if (ops.length > 0) {
+          set({ pendingCount: (await getPendingOps(userId)).length });
+          void get().sync();
+        }
+      }
+
+      return {
+        exercises: { added: exercises.added, updated: exercises.updated, skipped: exercises.skipped },
+        routines: { added: routines.added, updated: routines.updated, skipped: routines.skipped },
+        sessions: { added: sessions.added, updated: sessions.updated, skipped: sessions.skipped },
+        bodyWeight: { added: bodyWeight.added, updated: bodyWeight.updated, skipped: bodyWeight.skipped },
+        measurements: { added: measurements.added, updated: measurements.updated, skipped: measurements.skipped },
+      };
     },
   };
 });
