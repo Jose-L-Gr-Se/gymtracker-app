@@ -1,0 +1,50 @@
+{
+  "expo": {
+    "name": "GymTracker",
+    "slug": "gymtracker-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "gymtracker",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#08080a",
+    "ios": {
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.joselgrse.gymtracker",
+      "supportsTablet": false,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "com.joselgrse.gymtracker",
+      "adaptiveIcon": {
+        "backgroundColor": "#08080a",
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "backgroundImage": "./assets/images/android-icon-background.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#08080a",
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 96
+        }
+      ],
+      "expo-notifications"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}
